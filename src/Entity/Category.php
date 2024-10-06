@@ -25,6 +25,7 @@ class Category
 
     #[ORM\Column(length: 255)]
     #[Groups(['category:read', 'category:write'])]
+    #[Assert\NotBlank(messege: "Name null qabul qilmaydi!")]
     private ?string $name = null;
 
     /**
