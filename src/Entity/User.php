@@ -5,36 +5,61 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+    paginationItemsPerPage: 5
+)]
 class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Email(message: 'email formati xato!')]
+    #[Assert\NotBlank(message: 'email null qabul qilmaydi!')]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'password null qabul qilmaydi!')]
+    #[Groups(['user:write'])]
+    private ?string $password = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\Choice(options: ['erkak','ayol'], message: 'Jins erkak yoki ayol bo\'ladi!')]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $gender = null;
 
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\Range(min: 12, max: 100)]
     private ?int $age = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $phone = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    #[Groups(['user:read', 'user:write'])]
+    private array $roles = ['ROLE_USER'];
 
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
     private ?\DateTimeImmutable $createdAt = null;
+
+
 
     public function getId(): ?int
     {
@@ -121,6 +146,18 @@ class User
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
 
         return $this;
     }
